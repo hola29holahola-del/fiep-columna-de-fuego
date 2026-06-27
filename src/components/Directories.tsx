@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AppConfig, IglesiaUsuario, BoardMember } from "../types";
 import { downloadPlanillaPDF as generatePlanillaPDF, getWhatsAppLink as buildWhatsAppLink } from "../lib/pdfHelper";
 import { uploadToImgBB } from "../utils/imgbb";
+import DirectivosGrid from "./DirectivosGrid";
 import {
   Users,
   Search,
@@ -769,75 +770,15 @@ A través de campañas, conferencias y capacitación continua, impulsamos la pro
                   )}
                 </div>
 
-                {/* Grid de directivos de evangelismo estilo Junta Nacional: fotos en cuadritos completas pero pequeñas */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {evangelismoDirectivos.map((mbr, index) => (
-                    <div
-                      key={mbr.id || index}
-                      className={`flex flex-col bg-slate-50/40 hover:bg-slate-50 rounded-2xl border border-slate-100 shadow-3xs overflow-hidden relative group/evMbrCard transition-all duration-300 ${adminLoggedIn ? "border-2 border-dashed border-purple-400" : ""}`}
-                    >
-                      {adminLoggedIn && (
-                        <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-20 animate-fadeIn">
-                          <button
-                            onClick={async () => {
-                              if (!window.confirm("¿Seguro de remover este directivo del Departamento?")) return;
-                              try {
-                                if (mbr.id && onDeleteEvangelismoDirectivo) {
-                                  await onDeleteEvangelismoDirectivo(mbr.id);
-                                  if (triggerToast) triggerToast("Directivo removido correctamente.");
-                                }
-                              } catch (err) {
-                                console.error(err);
-                                if (triggerToast) triggerToast("Error al remover directivo.");
-                              }
-                            }}
-                            className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition cursor-pointer"
-                            title="Eliminar directivo"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                          <button
-                            onClick={() => openEvBoardEdit(index)}
-                            className="p-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition cursor-pointer"
-                            title="Editar directivo"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Cuadrito Portrait Frame similar al estilo solicitado: completo y pequeño */}
-                      <div className="pt-4 pb-2 flex justify-center items-center select-none">
-                        <div className="h-16 w-16 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white flex-shrink-0 relative flex items-center justify-center">
-                          {mbr.photoUrl ? (
-                            <img
-                              src={mbr.photoUrl}
-                              alt={`${mbr.nombre} ${mbr.apellido}`}
-                              referrerPolicy="no-referrer"
-                              className="h-full w-full object-contain group-hover/evMbrCard:scale-105 transition-transform duration-500 relative z-10 p-0.5"
-                            />
-                          ) : (
-                            <User className="h-7 w-7 text-slate-300 stroke-1" />
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="p-3 text-center bg-white border-t border-slate-50 space-y-0.5 min-h-[56px] flex flex-col justify-center">
-                        <div className="text-[9px] font-black text-purple-600 uppercase font-mono tracking-wider leading-tight">
-                          {mbr.cargo}
-                        </div>
-                        <h6 className="text-[11px] font-black text-slate-900 font-display leading-snug">
-                          {mbr.nombre} {mbr.apellido}
-                        </h6>
-                      </div>
-                    </div>
-                  ))}
-
-                  {evangelismoDirectivos.length === 0 && (
-                    <div className="col-span-full py-12 text-center text-slate-400 font-semibold italic text-xs">
-                      Ningún directivo registrado para este departamento todavía.
-                    </div>
-                  )}
+                {/* Grid de directivos de evangelismo estilo Junta Nacional: formato Grid de 4 columnas por fila en móviles */}
+                <div className="pt-2">
+                  <DirectivosGrid
+                    members={evangelismoDirectivos}
+                    adminLoggedIn={adminLoggedIn}
+                    onEdit={openEvBoardEdit}
+                    onDelete={onDeleteEvangelismoDirectivo}
+                    deptType="evangelismo"
+                  />
                 </div>
               </div>
             </div>
@@ -1310,56 +1251,15 @@ A través de campañas, conferencias y capacitación continua, impulsamos la pro
                 )}
               </div>
 
-              {institutoDirectivos.length === 0 ? (
-                <div className="text-center py-6 text-slate-400 italic text-[11px]">
-                  No hay director ni profesores registrados en la directiva del Instituto aún.
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
-                  {institutoDirectivos.map((mbr, idx) => (
-                    <div key={mbr.id || idx} className="bg-slate-50 rounded-2xl border border-slate-150 p-3 flex flex-col items-center text-center space-y-2 relative group">
-                      <div className="h-16 w-16 rounded-xl overflow-hidden bg-white border border-slate-200 relative flex-shrink-0 flex items-center justify-center">
-                        {mbr.photoUrl ? (
-                          <img src={mbr.photoUrl} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
-                        ) : (
-                          <User className="h-6 w-6 text-slate-300" />
-                        )}
-                      </div>
-                      <div className="space-y-0.5">
-                        <span className="inline-block text-[8px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          {mbr.cargo}
-                        </span>
-                        <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                          {mbr.nombre} {mbr.apellido}
-                        </h4>
-                      </div>
-
-                      {adminLoggedIn && (
-                        <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/85 p-1 rounded-lg shadow-sm z-10">
-                          <button
-                            onClick={() => openInstBoardEdit(idx)}
-                            className="p-1 hover:bg-slate-150 text-blue-600 rounded"
-                            title="Editar"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (window.confirm(`¿Desea eliminar a ${mbr.nombre} ${mbr.apellido} del cuerpo docente?`) && onDeleteInstitutoDirectivo && mbr.id) {
-                                await onDeleteInstitutoDirectivo(mbr.id);
-                              }
-                            }}
-                            className="p-1 hover:bg-slate-150 text-rose-600 rounded"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="pt-2">
+                <DirectivosGrid
+                  members={institutoDirectivos}
+                  adminLoggedIn={adminLoggedIn}
+                  onEdit={openInstBoardEdit}
+                  onDelete={onDeleteInstitutoDirectivo}
+                  deptType="instituto"
+                />
+              </div>
             </div>
 
             {/* Academic Info Grid Cards */}

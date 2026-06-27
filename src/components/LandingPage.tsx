@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { AppConfig, Publicacion, BoardMember, PresbiteroZona } from "../types";
 import { uploadToImgBB } from "../utils/imgbb";
 import Logo from "./Logo";
+import NewsPost from "./NewsPost";
+import HitosGallery from "./HitosGallery";
 import {
   Users,
   Flame,
@@ -781,109 +783,22 @@ export default function LandingPage({
                         {idx + 1}
                       </div>
 
-                      {/* Milestone Card Content Area */}
-                      <div className="bg-white hover:bg-slate-50/50 p-5 rounded-2xl border border-slate-100 hover:border-sky-100 shadow-xs hover:shadow-sm transition-all duration-300 relative group/card">
-                        
-                        {adminLoggedIn && (
-                          <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-80 group-hover/card:opacity-100 transition z-10">
-                            <button
-                              onClick={() => openMilestoneEdit(idx)}
-                              className="p-1.5 bg-blue-100 hover:bg-blue-200 rounded text-blue-700 cursor-pointer transition shadow-3xs"
-                              title="Editar Hito"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
-                            <button
-                              onClick={() => deleteMilestone(idx)}
-                              className="p-1.5 bg-rose-100 hover:bg-rose-200 rounded text-rose-700 cursor-pointer transition shadow-3xs"
-                              title="Eliminar Hito"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        )}
-
-                        {/* Flex layout for Year indicator and header title */}
-                        <div className="flex flex-wrap items-baseline gap-2 mb-2 pr-16 text-left">
-                          <span className="text-xs font-black tracking-wider uppercase font-mono text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
-                            {milestone.ano}
-                          </span>
-                          <h4 className="text-sm sm:text-base font-extrabold text-slate-900 font-display">
-                            {milestone.titulo}
-                          </h4>
-                        </div>
-
-                        {/* Elegant description & multimedia gallery */}
-                        <div className="space-y-3.5 mt-3 text-left">
-                          <p className="text-xs sm:text-xs text-slate-600 font-medium leading-relaxed font-sans whitespace-pre-wrap">
-                            {milestone.descripcion}
-                          </p>
-
-                          {/* Render multimedia elements (images/videos) */}
-                          {(milestone.imagen || (milestone.mediaList && milestone.mediaList.length > 0)) && (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-3">
-                              {/* Legacy image support if not duplicated in mediaList */}
-                              {milestone.imagen && !milestone.mediaList?.some(m => m.url === milestone.imagen) && (
-                                <div 
-                                  onClick={() => setLightboxImage(milestone.imagen || null)}
-                                  className="aspect-video sm:aspect-square rounded-xl overflow-hidden border border-slate-100 bg-slate-950 relative group/item shadow-2xs hover:shadow-sm transition-all duration-300 cursor-zoom-in"
-                                  title="Ver imagen completa"
-                                >
-                                  <img
-                                    src={milestone.imagen}
-                                    alt={milestone.titulo}
-                                    referrerPolicy="no-referrer"
-                                    className="h-full w-full object-contain group-hover/item:scale-103 transition duration-300"
-                                  />
-                                  <div className="absolute inset-0 bg-slate-900/15 group-hover/item:bg-slate-900/30 opacity-0 group-hover/item:opacity-100 transition-all duration-300 flex items-center justify-center">
-                                    <div className="bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md transform scale-75 group-hover/item:scale-100 transition-all duration-300">
-                                      <Plus className="h-4 w-4 text-slate-800" />
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Unified mediaList files (unlimited images & videos!) */}
-                              {milestone.mediaList?.map((media, mIdx) => (
-                                <div 
-                                  key={mIdx} 
-                                  className={`aspect-video sm:aspect-square rounded-xl overflow-hidden border border-slate-100 bg-slate-950 relative group/item shadow-2xs hover:shadow-sm transition-all duration-300 flex items-center justify-center ${media.type === "image" ? "cursor-zoom-in" : ""}`}
-                                  onClick={() => {
-                                    if (media.type === "image") {
-                                      setLightboxImage(media.url);
-                                    }
-                                  }}
-                                  title={media.type === "image" ? "Ver imagen completa" : undefined}
-                                >
-                                  {media.type === "image" ? (
-                                    <>
-                                      <img
-                                        src={media.url}
-                                        alt={`${milestone.titulo} - ${mIdx + 1}`}
-                                        referrerPolicy="no-referrer"
-                                        className="h-full w-full object-contain group-hover/item:scale-103 transition duration-300"
-                                      />
-                                      <div className="absolute inset-0 bg-slate-900/15 group-hover/item:bg-slate-900/30 opacity-0 group-hover/item:opacity-100 transition-all duration-300 flex items-center justify-center">
-                                        <div className="bg-white/90 backdrop-blur-xs p-1.5 rounded-full shadow-md transform scale-75 group-hover/item:scale-100 transition-all duration-300">
-                                          <Plus className="h-4 w-4 text-slate-800" />
-                                        </div>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <video
-                                      src={media.url}
-                                      controls
-                                      preload="metadata"
-                                      className="h-full w-full object-contain"
-                                    />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                      </div>
+                      {/* Unified NewsPost & HitosGallery rendering */}
+                      <NewsPost
+                        ano={milestone.ano}
+                        titulo={milestone.titulo}
+                        descripcion={milestone.descripcion}
+                        adminLoggedIn={adminLoggedIn}
+                        onEdit={() => openMilestoneEdit(idx)}
+                        onDelete={() => deleteMilestone(idx)}
+                      >
+                        <HitosGallery
+                          imagen={milestone.imagen}
+                          mediaList={milestone.mediaList}
+                          onImageClick={(url) => setLightboxImage(url)}
+                          title={milestone.titulo}
+                        />
+                      </NewsPost>
                     </div>
                   );
                 })
